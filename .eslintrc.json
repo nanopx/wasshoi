@@ -1,0 +1,63 @@
+{
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "node": true,
+    "es6": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": [
+    "react",
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "arrowParens": "always",
+        "endOfLine": "lf",
+        "jsxBracketSameLine": true,
+        "bracketSpacing": true,
+        "tabWidth": 2,
+        "semi": false
+      }
+    ],
+    "no-console": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/camelcase": "off"
+  },
+  "overrides": [{
+    "files": [
+      "*.js"
+    ],
+    "rules": {
+      "@typescript-eslint/no-var-requires": "off"
+    }
+  }],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "alias": {
+        "map": [
+          ["~", "./src"]
+        ],
+        "extensions": [".css", ".js", ".jsx", ".ts", ".tsx", ".json"]
+      }
+    }
+  }
+}

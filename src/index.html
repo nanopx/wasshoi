@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>wasshoi</title>
+  <link
+    href="https://fonts.googleapis.com/css?family=Noto+Sans+JP"
+    rel="stylesheet"
+  >
+  <style>
+    html,
+    body {
+      font-family: "Noto Sans JP", Verdana, Geneva, Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+      pointer-events: none;
+      -webkit-user-select: none;
+    }
+
+    #screen {
+      /* background-color: black; */
+      height: 100vh;
+      width: 100vw;
+      background-color: transparent;
+      pointer-events: none;
+      -webkit-user-select: none;
+      border: 1px solid lime;
+      box-sizing: border-box;
+    }
+
+    code,
+    pre {
+      font-family: Monaco, Menlo, Consolas, "Courier New", monospace !important;
+      white-space: normal;
+      color: #e01e5a;
+      padding: 2px 3px 1px;
+      font-variant-ligatures: none;
+      tab-size: 4;
+      background-color: #f7f7f9;
+      border: 1px solid #e1e1e8;
+      white-space: nowrap;
+      border-radius: 3px;
+    }
+
+    pre {
+      color: #333 !important;
+      padding: 0 3px 2px;
+      margin: 0;
+    }
+
+    @keyframes blink {
+      75% {
+        opacity: 0;
+      }
+    }
+
+    .effect-blink {
+      animation: blink .7s step-end infinite;
+    }
+
+    @keyframes wave {
+      0% {
+        transform: translate3d(0, 50px, 0);
+      }
+
+      50% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      100% {
+        transform: translate3d(0, 50px, 0);
+      }
+    }
+
+    .effect-wave {
+      animation: wave 2s ease-in-out infinite;
+      padding-bottom: 50px;
+    }
+
+    @keyframes jump {
+
+      0%,
+      81%,
+      100% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      80% {
+        transform: translate3d(0, 50px, 0);
+      }
+    }
+
+    .effect-jump {
+      animation: jump 0.5s linear infinite;
+      padding-bottom: 50px;
+    }
+
+    @keyframes shake {
+      0% {
+        transform: translate(0px, 0px) rotateZ(0deg)
+      }
+
+      25% {
+        transform: translate(2px, 2px) rotateZ(1deg)
+      }
+
+      50% {
+        transform: translate(0px, 2px) rotateZ(0deg)
+      }
+
+      75% {
+        transform: translate(2px, 0px) rotateZ(-1deg)
+      }
+
+      100% {
+        transform: translate(0px, 0px) rotateZ(0deg)
+      }
+    }
+
+    .effect-shake {
+      animation: shake .1s infinite;
+    }
+
+    @keyframes glow {
+      0% {
+        text-shadow: 0 0 10px;
+      }
+
+      50% {
+        text-shadow: 0 0 20px;
+      }
+
+      100% {
+        text-shadow: 0 0 10px;
+      }
+    }
+
+    .effect-glow {
+      animation: glow 1s ease infinite;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="screen"></div>
+</body>
+
+</html>
