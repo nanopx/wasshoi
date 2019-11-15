@@ -1,4 +1,4 @@
-const commandKeys: string[] = [
+const keywordList: string[] = [
   'type',
   'position',
   'duration',
@@ -12,11 +12,11 @@ const commandKeys: string[] = [
 
 const commandParser = (
   text: string,
-  keywords: string[] = commandKeys
+  keywords: string[] = keywordList
 ): { [key: string]: any } => {
   if (text.indexOf(':') === -1) {
     return {
-      text: text,
+      message: text,
     }
   }
 
