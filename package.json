@@ -74,7 +74,7 @@
     "bufferutil": "^4.0.1",
     "cross-env": "^6.0.3",
     "electron": "^7.1.1",
-    "electron-builder": "21.2.0",
+    "electron-builder": "^22.1.0",
     "electron-connect": "^0.6.3",
     "electron-load-devtool": "^1.2.0",
     "electron-reload-webpack-plugin": "^2.0.4",
