@@ -1,3 +1,4 @@
+import path from 'path'
 import authHtml from './auth.html'
 import { clipboard, dialog, BrowserWindow, Menu } from 'electron'
 import { RTMClient } from '@slack/rtm-api'
@@ -27,7 +28,7 @@ export default class SlackModule extends Module {
       },
     })
 
-    this.authWindow.loadFile(authHtml)
+    this.authWindow.loadFile(path.resolve(__dirname, authHtml))
 
     this.authWindow.on('closed', () => {
       this.authWindow = null

@@ -46,7 +46,7 @@ const main = {
         loader: 'file-loader',
         options: {
           name: '[name].[ext]',
-          publicPath: path.resolve(__dirname, 'build'),
+          publicPath: './',
         },
       },
       {
@@ -56,7 +56,7 @@ const main = {
             loader: 'file-loader',
             options: {
               name: '[name].[ext]',
-              publicPath: path.resolve(__dirname, 'build'),
+              publicPath: './',
             },
           },
           'extract-loader',
@@ -64,6 +64,9 @@ const main = {
         ],
       },
     ],
+  },
+  node: {
+    __dirname: false,
   },
   plugins: isDev
     ? [envDefinePlugin, ElectronReloadWebpackPlugin()]

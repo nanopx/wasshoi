@@ -1,4 +1,5 @@
-import { Tray, Menu, MenuItem, nativeImage } from 'electron'
+import path from 'path'
+import { Tray, Menu, MenuItem } from 'electron'
 import pkg from '../../package.json'
 import Application from './application.js'
 import trayIcon from './assets/tray.png'
@@ -8,7 +9,7 @@ export default class AppTray {
   private menuItems: MenuItem[] = []
 
   constructor(private app: Application) {
-    this.tray = new Tray(nativeImage.createFromPath(trayIcon))
+    this.tray = new Tray(path.resolve(__dirname, trayIcon))
     this.tray.setToolTip(pkg.name)
   }
 
