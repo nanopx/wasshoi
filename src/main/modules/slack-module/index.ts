@@ -4,19 +4,14 @@ import { clipboard, dialog, BrowserWindow, Menu } from 'electron'
 import { RTMClient } from '@slack/rtm-api'
 import { WebClient } from '@slack/web-api'
 import { Module } from '../module'
-import Application from '../../application'
 import asyncHandler from '../../lib/async-handler'
-import SlackMessageParser from './slack-message-parser'
+import SlackMessageFormatter from './slack-message-formatter'
 
 export default class SlackModule extends Module {
   name = 'slack'
   webClient: WebClient | null = null
   rtmClient: RTMClient | null = null
   authWindow: BrowserWindow | null = null
-
-  constructor(app: Application) {
-    super(app)
-  }
 
   private createAuthWindow() {
     this.authWindow = new BrowserWindow({
@@ -49,7 +44,10 @@ export default class SlackModule extends Module {
 
     this.getTray().update()
 
-    const parser = new SlackMessageParser(this.webClient, new WebClient(token))
+    const formatter = new SlackMessageFormatter(
+      this.webClient,
+      new WebClient(token)
+    )
 
     // Attach listeners to events by type. See: https://api.slack.com/events/message
     this.rtmClient.on('message', async (event) => {
@@ -61,12 +59,13 @@ export default class SlackModule extends Module {
       if (!activatedChannels.includes(event.channel)) return
 
       if (event.type === 'message' && !event.subtype && event.text) {
-        let message = await parser.parse(event.text)
+        let message = await formatter.format(event.text)
 
         if (config.get('display.show_username', false)) {
           const { user } = await (this.webClient as WebClient).users.info({
             user: event.user,
           })
+
           message = `@${(user as any).profile.display_name}: ${message}`
         }
 

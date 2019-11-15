@@ -24,7 +24,7 @@ const slackMd2Html = (message: string) => {
   return converted.replace(/\n/g, '<br />')
 }
 
-export default class SlackMessageParser {
+export default class SlackMessageFormatter {
   // TODO: Pass resources instead of WebClient
   constructor(
     private botWebClient: WebClient,
@@ -105,7 +105,7 @@ export default class SlackMessageParser {
     return message
   }
 
-  async parse(message: string) {
+  async format(message: string) {
     message = await this.replaceTags(message)
     message = slackMd2Html(message)
     message = await this.replaceEmojis(message)
