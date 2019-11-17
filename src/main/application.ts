@@ -7,22 +7,23 @@ import WebServer from './web-server'
 import { Module } from './modules/module'
 import SlackModule from './modules/slack-module'
 import WasshoiModule from './modules/wasshoi-module'
+import SpeechModule from './modules/speech-module'
 
 export default class Application {
   private mainWindow: MainWindow | null = null
   private moduleManager: ModuleManager
   private webServer: WebServer
   private tray: AppTray | null = null
-  private port: number
   private config: Store<any>
 
   constructor() {
     const port = process.env.WASSHOI_SERVER_PORT
-    this.port = port ? parseInt(port, 10) : 13232
+      ? parseInt(process.env.WASSHOI_SERVER_PORT, 10)
+      : 13232
 
     this.config = new Store()
 
-    this.webServer = new WebServer()
+    this.webServer = new WebServer(port)
     this.moduleManager = new ModuleManager(this)
   }
 
@@ -30,8 +31,12 @@ export default class Application {
     return this.config
   }
 
-  getServer(): WebServer {
+  getInternalServer(): WebServer {
     return this.webServer
+  }
+
+  getInternalServerPort(): number {
+    return this.webServer.getPort()
   }
 
   getTray(): AppTray | null {
@@ -63,8 +68,7 @@ export default class Application {
     this.mainWindow = new MainWindow(this)
     this.tray = new AppTray(this)
 
-    // We only have root and slack modules for now
-    this.moduleManager.register([WasshoiModule, SlackModule])
+    this.moduleManager.register([WasshoiModule, SlackModule, SpeechModule])
 
     // Always initialize tray after the module registration
     this.tray.initialize()
@@ -73,7 +77,7 @@ export default class Application {
     this.moduleManager.setup()
 
     // Initialize web server
-    await this.webServer.listen(this.port)
+    await this.webServer.listen()
 
     // Listen to messages from each datasource
     await this.moduleManager.listen()

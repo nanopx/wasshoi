@@ -45,7 +45,7 @@ const main = {
         test: /\.(png|jpe?g|gif)$/i,
         loader: 'file-loader',
         options: {
-          name: '[name].[ext]',
+          name: '[path][name].[ext]',
           publicPath: './',
         },
       },
@@ -55,7 +55,7 @@ const main = {
           {
             loader: 'file-loader',
             options: {
-              name: '[name].[ext]',
+              name: '[path][name].[ext]',
               publicPath: './',
             },
           },
