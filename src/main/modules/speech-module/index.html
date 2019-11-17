@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Speech to wasshoi</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"
+  >
+  <style>
+    .control-commands {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        Speech to wasshoi
+      </h1>
+      <p class="subtitle">
+        音声を認識し、wasshoiへ送信する
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="field is-grouped is-grouped-multiline">
+      <div class="control">
+        <div class="tags has-addons">
+          <span class="tag is-dark">wasshoi server</span>
+          <span
+            id="server_status"
+            class="tag is-danger"
+          >offline</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field is-grouped is-grouped-multiline">
+      <div class="control">
+        <button
+          id="rec"
+          class="button is-danger is-outlined"
+          disabled
+        >
+          <span class="icon">
+            <i class="fas fa-microphone"></i>
+          </span>
+          <span>録音</span>
+        </button>
+
+        <button
+          id="rec_stop"
+          class="button is-danger is-hidden"
+        >
+          <span class="icon">
+            <i class="fas fa-stop"></i>
+          </span>
+          <span>停止</span>
+        </button>
+      </div>
+
+      <div class="control">
+        <p class="control has-icons-left">
+          <input
+            id="speaker_name"
+            class="input is-success"
+            type="text"
+            placeholder="Speaker Name"
+            value="Speaker"
+          >
+          <span class="icon is-small is-left">
+            <i class="fas fa-user"></i>
+          </span>
+        </p>
+      </div>
+
+      <div class="control control-commands">
+        <p class="control has-icons-left">
+          <input
+            id="commands"
+            class="input is-success"
+            type="text"
+            placeholder="Commands"
+            value="type:broadcast position:bottom size:20 color:aqua duration:3"
+          >
+          <span class="icon is-small is-left">
+            <i class="fas fa-terminal"></i>
+          </span>
+      </div>
+      </p>
+    </div>
+
+    <article class="panel is-info">
+      <p class="panel-heading">
+        ログ
+      </p>
+      <div id="log_list"></div>
+    </article>
+  </section>
+
+  <script>
+    const $serverStatus = document.getElementById('server_status')
+    const $rec = document.getElementById('rec')
+    const $recStop = document.getElementById('rec_stop')
+    const $logList = document.getElementById('log_list')
+
+    const createMessageLog = (message) => {
+      const $div = document.createElement('div')
+
+      $div.classList.add('panel-block')
+      $div.innerHTML = `
+        <span class="panel-icon">
+          <i
+            class="fas fa-comment"
+            aria-hidden="true"
+          ></i>
+        </span>
+        ${message}
+      `
+
+      return $div
+    }
+
+    const appendLog = (message) => {
+      $logList.prepend(createMessageLog(message))
+    }
+
+    const updateLastLog = (message) => {
+      $logList.firstChild.replaceWith(createMessageLog(message))
+    }
+
+    const getSpeakerName = () => {
+      const $speakerName = document.getElementById('speaker_name')
+      return $speakerName.value || null
+    }
+
+    const getCommands = () => {
+      const $commands = document.getElementById('commands')
+      return $commands.value || ''
+    }
+
+    let isFlushed = true
+    const log = (message, flush = false) => {
+      if (isFlushed) {
+        appendLog(message)
+      } else {
+        updateLastLog(message)
+      }
+
+      if (flush) {
+        isFlushed = true
+      } else {
+        isFlushed = false
+      }
+    }
+
+    const recLoading = () => {
+      $rec.classList.add('is-loading')
+    }
+
+    const setRecButtonState = (isRecording) => {
+      $rec.classList.remove('is-loading')
+
+      if (isRecording) {
+        $rec.classList.add('is-hidden')
+        $recStop.classList.remove('is-hidden')
+      } else {
+        $rec.classList.remove('is-hidden')
+        $recStop.classList.add('is-hidden')
+      }
+    }
+
+
+    const serverOnline = () => {
+      $serverStatus.classList.remove('is-danger')
+      $serverStatus.classList.add('is-success')
+      $serverStatus.innerText = 'online'
+      $rec.removeAttribute('disabled')
+    }
+
+    const serverOffline = () => {
+      $serverStatus.classList.remove('is-success')
+      $serverStatus.classList.add('is-danger')
+      $serverStatus.innerText = 'offline'
+      $rec.setAttribute('disabled', true)
+      stopRecording()
+    }
+
+    let ws
+    let recognition
+
+    const createSpeechRecognition = () => {
+      const SpeechRecognition = webkitSpeechRecognition || SpeechRecognition
+      recognition = new SpeechRecognition()
+
+      recognition.lang = 'ja-JP'
+      recognition.interimResults = true
+      recognition.continuous = true
+
+      recognition.onsoundstart = function () {
+        setRecButtonState(true)
+      }
+
+      recognition.onerror = function (e) {
+        if (e.error === 'no-speech') {
+          createSpeechRecognition()
+          recognition.start()
+        } else {
+          console.log('Speech recognition error detected: ' + e.error)
+          console.log('Additional information: ' + e.message)
+          setRecButtonState(false)
+        }
+      }
+
+      recognition.onresult = function (event) {
+        const results = event.results
+        for (let i = event.resultIndex; i < results.length; i++) {
+          const text = results[i][0].transcript
+
+          if (results[i].isFinal) {
+            const speakerName = getSpeakerName()
+            const commands = getCommands()
+            ws && ws.send(speakerName ? `${speakerName}: ${text}${commands ? ` ${commands}` : ''}` : text)
+            log(text, true)
+          } else {
+            log('<i style="color:#ddd;">' + text + '</i>', false)
+          }
+        }
+      }
+
+      return recognition
+    }
+
+    createSpeechRecognition()
+
+    const startRecording = () => {
+      recognition.start()
+    }
+
+    const stopRecording = () => {
+      setRecButtonState(false)
+      if (!recognition) return
+      recognition.stop()
+    }
+
+    const connect = () => {
+      ws = new WebSocket('ws://127.0.0.1:<%= port %>/speech')
+
+      ws.addEventListener('open', function (e) {
+        serverOnline()
+      })
+
+      ws.addEventListener('close', function (e) {
+        serverOffline()
+        setTimeout(() => connect(), 3000)
+      })
+
+      ws.addEventListener('message', function (e) {
+        console.log('WS message', e)
+      })
+    }
+
+    $rec.addEventListener('click', () => {
+      recLoading()
+      startRecording()
+    })
+
+    $recStop.addEventListener('click', () => {
+      stopRecording()
+    })
+
+    connect()
+  </script>
+
+  <script
+    defer
+    src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+  ></script>
+</body>
+
+</html>

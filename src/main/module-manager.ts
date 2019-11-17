@@ -25,7 +25,7 @@ export default class ModuleManager {
   }
 
   async setup(): Promise<any> {
-    const server = this.app.getServer()
+    const server = this.app.getInternalServer()
     await this.eachModule(async (module) => {
       await module.setup()
 

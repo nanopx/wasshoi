@@ -11,7 +11,7 @@ export abstract class Module {
   private router: Router
 
   constructor(private app: Application) {
-    const server = this.app.getServer()
+    const server = this.app.getInternalServer()
     this.router = server.getRouter()
   }
 
