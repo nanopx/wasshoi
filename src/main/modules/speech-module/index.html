@@ -90,7 +90,7 @@
             class="input is-success"
             type="text"
             placeholder="Commands"
-            value="type:broadcast position:bottom size:20 color:aqua duration:3"
+            value="type:broadcast position:bottom size:24 color:orange duration:3"
           >
           <span class="icon is-small is-left">
             <i class="fas fa-terminal"></i>
@@ -179,7 +179,6 @@
       }
     }
 
-
     const serverOnline = () => {
       $serverStatus.classList.remove('is-danger')
       $serverStatus.classList.add('is-success')
@@ -197,8 +196,11 @@
 
     let ws
     let recognition
+    let timer
+    let autoRestart = true
 
-    const createSpeechRecognition = () => {
+    const initSpeechRecognition = () => {
+      console.log('Initializing recognition')
       const SpeechRecognition = webkitSpeechRecognition || SpeechRecognition
       recognition = new SpeechRecognition()
 
@@ -210,45 +212,89 @@
         setRecButtonState(true)
       }
 
+      recognition.onnspeechend = function () {
+        setRecButtonState(false)
+      }
+
       recognition.onerror = function (e) {
-        if (e.error === 'no-speech') {
-          createSpeechRecognition()
-          recognition.start()
-        } else {
-          console.log('Speech recognition error detected: ' + e.error)
-          console.log('Additional information: ' + e.message)
-          setRecButtonState(false)
+        console.error(e)
+        switch (e.error) {
+          case 'network':
+          case 'not-allowed':
+          case 'service-not-allowed':
+            autoRestart = false
+            setRecButtonState(false)
+            break
+          default:
+            break
+        }
+      }
+
+      recognition.onend = function() {
+        if (autoRestart) {
+          console.log('Re-initializing...')
+          initSpeechRecognition()
         }
       }
 
       recognition.onresult = function (event) {
         const results = event.results
+
+        if (timer) {
+          clearTimeout(timer)
+        }
+
         for (let i = event.resultIndex; i < results.length; i++) {
           const text = results[i][0].transcript
 
           if (results[i].isFinal) {
+            console.log('f', text)
+            let modifiedText = text
+
             const speakerName = getSpeakerName()
+            if (speakerName) {
+              modifiedText = `${speakerName}: ${modifiedText}`
+            }
+
+            modifiedText = `<b>${modifiedText}</b>`
+
             const commands = getCommands()
-            ws && ws.send(speakerName ? `${speakerName}: ${text}${commands ? ` ${commands}` : ''}` : text)
+            if (commands) {
+              modifiedText = `${modifiedText} ${commands}`
+            }
+
+            ws && ws.send(modifiedText)
             log(text, true)
+
+            recognition.stop()
+            // initSpeechRecognition()
           } else {
+            console.log('c', text)
+
+            timer = setTimeout(() => {
+              console.log('Timed out. Reinitializing...')
+              recognition.stop()
+              // initSpeechRecognition()
+            }, 8000)
+
             log('<i style="color:#ddd;">' + text + '</i>', false)
           }
         }
       }
 
-      return recognition
+      recognition.start()
     }
 
-    createSpeechRecognition()
 
     const startRecording = () => {
-      recognition.start()
+      autoRestart = true
+      initSpeechRecognition()
     }
 
     const stopRecording = () => {
       setRecButtonState(false)
       if (!recognition) return
+      autoRestart = false
       recognition.stop()
     }
 
