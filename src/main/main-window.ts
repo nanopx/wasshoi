@@ -19,15 +19,16 @@ export default class MainWindow {
       webPreferences: {
         nodeIntegration: true,
       },
-      fullscreenable: false,
+      enableLargerThanScreen: true,
     })
 
     this.window.maximize()
+
+    this.bringToTop()
+
     this.window.setIgnoreMouseEvents(true)
 
     this.window.loadFile('./build/index.html')
-
-    this.bringToTop()
 
     this.window.on('closed', () => {
       this.window = null
@@ -35,7 +36,8 @@ export default class MainWindow {
     })
 
     this.window.on('ready-to-show', (): void => {
-      if (this.window) this.window.show()
+      if (!this.window) return
+      this.window.show()
     })
 
     this.window.on('closed', (): void => {
@@ -51,8 +53,10 @@ export default class MainWindow {
   bringToTop() {
     if (!this.window) return
     if (process.platform === 'darwin') electronApp.dock.hide()
-    this.window.setAlwaysOnTop(true, 'floating')
+    this.window.setAlwaysOnTop(true, 'screen-saver', 1)
+    this.window.moveTop()
     this.window.setVisibleOnAllWorkspaces(true)
+    this.window.setFullScreenable(false)
     if (process.platform === 'darwin') electronApp.dock.show()
   }
 
