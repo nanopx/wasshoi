@@ -84,7 +84,8 @@ const renderer = {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
   },
   entry: {
-    app: './src/renderer/index.ts',
+    'renderer-main': './src/renderer/main.ts',
+    'renderer-log': './src/renderer/log.tsx',
   },
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -105,17 +106,27 @@ const renderer = {
         envDefinePlugin,
         ElectronReloadWebpackPlugin(),
         new HtmlWebpackPlugin({
-          template: './src/index.html',
-          chunks: ['app'],
-          filename: 'index.html',
+          template: './src/main-view.html',
+          chunks: ['renderer-main'],
+          filename: 'main-view.html',
+        }),
+        new HtmlWebpackPlugin({
+          template: './src/log-view.html',
+          chunks: ['renderer-log'],
+          filename: 'log-view.html',
         }),
       ]
     : [
         envDefinePlugin,
         new HtmlWebpackPlugin({
-          template: './src/index.html',
-          chunks: ['app'],
-          filename: 'index.html',
+          template: './src/main-view.html',
+          chunks: ['renderer-main'],
+          filename: 'main-view.html',
+        }),
+        new HtmlWebpackPlugin({
+          template: './src/log-view.html',
+          chunks: ['renderer-log'],
+          filename: 'log-view.html',
         }),
       ],
   devtool: isDev ? 'inline-source-map' : false,

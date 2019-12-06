@@ -1,12 +1,15 @@
 import { ipcRenderer } from 'electron'
 import Wasshoi from './lib/wasshoi'
-
-import './core/block-mouse-events'
+// import blockMouseEvents from './core/block-mouse-events'
 import commandParser from './lib/command-parser'
+import Store from 'electron-store'
+
+// blockMouseEvents()
 
 // App
 const $screen = document.getElementById('screen') as HTMLDivElement
 
+const config = new Store()
 const wasshoi = new Wasshoi($screen)
 
 const sleep = (sec = 1) => {
@@ -16,7 +19,11 @@ const sleep = (sec = 1) => {
   )
 }
 
-ipcRenderer.on('message', async (event, { text, options = {} }) => {
+ipcRenderer.on('message', async (_, { text, options = {} }) => {
+  if (config.get('display.show_username', false) && options.username) {
+    text = `${options.username}: ${text}`
+  }
+
   const {
     message,
     type,

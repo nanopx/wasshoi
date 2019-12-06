@@ -8,18 +8,11 @@ export default class WasshoiModule extends Module {
     return screen.getDisplayNearestPoint(this.getBrowserWindow().getBounds())
   }
 
-  async setup(): Promise<any> {
-    return Promise.resolve()
-  }
-
-  listen(): Promise<any> {
-    return Promise.resolve()
-  }
-
   async getTrayMenus() {
     const config = this.getConfig()
     const window = this.getBrowserWindow()
     const currentDisplay = this.getCurrentDisplay()
+    const logWindow = this.getLogWindow()
 
     return Promise.resolve([
       {
@@ -145,6 +138,17 @@ export default class WasshoiModule extends Module {
             ] as any) as Menu,
           },
         ] as any) as Menu,
+      },
+      {
+        label: !logWindow.isOpen() ? 'ログを開く' : 'ログを閉じる',
+        click: () => {
+          if (!logWindow.isOpen()) {
+            logWindow.show()
+          } else {
+            logWindow.hide()
+          }
+          this.getTray().update()
+        },
       },
     ])
   }

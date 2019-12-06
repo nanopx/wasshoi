@@ -1,17 +1,18 @@
-import { BrowserWindow, app as electronApp, screen } from 'electron'
+import { BrowserWindow, app as electronApp } from 'electron'
 import { client } from 'electron-connect'
 import loadDevtool from 'electron-load-devtool'
 import Application from './application'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-export default class MainWindow {
-  window: BrowserWindow | null = null
+export default class LogWindow {
+  private window: BrowserWindow | null = null
 
   constructor(private app: Application) {
     this.window = new BrowserWindow({
-      width: 800,
-      height: 600,
+      show: false,
+      width: 500,
+      height: 800,
       frame: false,
       transparent: true,
       hasShadow: false,
@@ -20,26 +21,12 @@ export default class MainWindow {
       webPreferences: {
         nodeIntegration: true,
       },
-      enableLargerThanScreen: true,
     })
 
-    const currentScreen = screen.getDisplayNearestPoint(this.window.getBounds())
-    this.window.setBounds(currentScreen.bounds)
-
-    this.bringToTop()
-
-    this.window.setIgnoreMouseEvents(true)
-
-    this.window.loadFile('./build/main-view.html')
+    this.window.loadFile('./build/log-view.html')
 
     this.window.on('closed', () => {
       this.window = null
-      app.quit()
-    })
-
-    this.window.on('ready-to-show', (): void => {
-      if (!this.window) return
-      this.window.show()
     })
 
     this.window.on('closed', (): void => {
@@ -52,6 +39,19 @@ export default class MainWindow {
     }
   }
 
+  isOpen(): boolean {
+    return this.window ? this.window.isVisible() : false
+  }
+
+  show() {
+    this.window && this.window.show()
+    this.bringToTop()
+  }
+
+  hide() {
+    this.window && this.window.hide()
+  }
+
   bringToTop() {
     if (!this.window) return
     if (process.platform === 'darwin') electronApp.dock.hide()
@@ -61,8 +61,8 @@ export default class MainWindow {
     if (process.platform === 'darwin') electronApp.dock.show()
   }
 
-  getBrowserWindow(): BrowserWindow {
-    return this.window as BrowserWindow
+  getBrowserWindow(): BrowserWindow | null {
+    return this.window
   }
 
   dispatch(text: string, options: object = {}): void {

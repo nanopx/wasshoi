@@ -59,17 +59,15 @@ export default class SlackModule extends Module {
       if (!activatedChannels.includes(event.channel)) return
 
       if (event.type === 'message' && !event.subtype && event.text) {
-        let message = await formatter.format(event.text)
+        const message = await formatter.format(event.text)
 
-        if (config.get('display.show_username', false)) {
-          const { user } = await (this.webClient as WebClient).users.info({
-            user: event.user,
-          })
+        const { user } = await (this.webClient as WebClient).users.info({
+          user: event.user,
+        })
 
-          message = `@${(user as any).profile.display_name}: ${message}`
-        }
-
-        this.dispatch(message)
+        this.dispatch(message, {
+          username: `@${(user as any).profile.display_name}`,
+        })
       }
     })
 

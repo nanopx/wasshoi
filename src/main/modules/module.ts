@@ -1,7 +1,6 @@
 import Application from '../application'
 import AppTray from '../app-tray'
-import { MenuItem, BrowserWindow } from 'electron'
-import MainWindow from '../main-window'
+import { MenuItem } from 'electron'
 import { Router } from 'express-ws'
 
 export type DispatchFn = (text: string, options?: object) => void
@@ -32,15 +31,19 @@ export abstract class Module {
   }
 
   getMainWindow() {
-    return this.app.getMainWindow() as MainWindow
+    return this.app.getMainWindow()
+  }
+
+  getLogWindow() {
+    return this.app.getLogWindow()
   }
 
   dispatch(text: string, options?: object) {
-    this.getMainWindow().dispatch(text, options)
+    this.app.dispatch(text, options)
   }
 
   getBrowserWindow() {
-    return this.app.getBrowserWindow() as BrowserWindow
+    return this.app.getBrowserWindow()
   }
 
   getTray() {
@@ -51,9 +54,14 @@ export abstract class Module {
     return Promise.resolve([])
   }
 
-  abstract setup(): Promise<any>
+  async setup(): Promise<any> {
+    return Promise.resolve()
+  }
 
-  abstract listen(dispatch: DispatchFn): Promise<any>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  listen(dispatch: DispatchFn): Promise<any> {
+    return Promise.resolve()
+  }
 }
 
 export type ModuleClass = new (app: Application) => Module
